@@ -9,7 +9,7 @@ class Node:
 		self.depth = 0
 
 	def __repr__(self):
-		return "Node{"+"freq="+str(self.getKey())+", char="+str(self.getValue())+"}"
+		return str(self.getKey())+":"+str(self.getValue())
 	def getKey(self):
 		return self.key
 	def setKey(self, key):
@@ -64,9 +64,7 @@ class Huffman():
 				return self.setDepthRec(root.getDown(), size)
 
 	def __str__(self):
-		#return str("[" + self.toString(self.root) + "]")
 		return str(self.myArr[::-1])
-	
 
 	def construct(self):
 		while(self.queue.qsize()!=1):			
@@ -82,24 +80,37 @@ class Huffman():
 		self.root = self.queue.get()
 		self.myArr.append(self.root)
 		self.setDepth()
+	def compressedChar(self, root, char, path):
+		if(root.isLeaf()):
+			if(char==root.getValue()):
+				return path
+			else:
+				return ""
+		else:
+			return self.compressedChar(root.getUp(), char, path+"1")+self.compressedChar(root.getDown(), char, path+"0")
+
+
 
 
 
 filename = "txt.txt"
+encodedText = ""
 file = open(filename, "r")
 lines = file.read()
 lines.replace("\n", "\\n")
 huffman = Huffman(lines)
+for char in lines:
+	encodedText+=huffman.compressedChar(huffman.root, char, "")
+tempStr = str(huffman)
+encodedTree = ''.join(format(ord(x), 'b') for x in tempStr)
+print("Tree:")
 print(str(huffman))
-i = 0
-for char in lines :
-	i += 1
-i *= 32
-j = 0
-for item in huffman.myArr:
-	if(item.isLeaf()):
-		j+=item.key*item.depth
-print(1.0-(1.0*j/i))
+print("Encoded Tree:")
+print(encodedTree)
+print("Encoded Text:")
+print(encodedText)
+print("Compression Ratio:")
+print((len(lines)*32.0)/(len(encodedText)+len(encodedTree)))
 
 
 
